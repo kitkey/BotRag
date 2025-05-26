@@ -1,8 +1,6 @@
 fastapi==0.115.12
 uvicorn==0.34.2
 
-faster-whisper==1.1.1
-
 qdrant-client==1.14.2
 
 langchain==0.3.25
@@ -11,5 +9,7 @@ langchain-text-splitters==0.3.8
 langchain-ollama==0.3.3
 langchain-qdrant==0.2.0
 langchain-openai==0.3.17
+langchain_community==0.3.24
 
-yt-dlp==2025.4.30
+celery==5.5.2
+redis==6.1.0

@@ -1,0 +1,8 @@
+celery==5.5.2
+redis==6.1.0
+faster-whisper==1.1.1
+yt-dlp==2025.4.30
+
+langchain-text-splitters==0.3.8
+langchain-ollama==0.3.3
+langchain-qdrant==0.2.0

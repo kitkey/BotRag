@@ -15,24 +15,21 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [ gpu ]
+
   rag_service:
     build:
       context: stt/
     command: sh -c "uvicorn app:app --host=0.0.0.0 --port 8000"
     ports:
       - 8000:8000
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - qdrant
       - ollama
-    volumes:
-      - whisper_model_cache:/home/app/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+      - redis
+      - celery
+
   bot:
     build:
       context: bot/
@@ -41,6 +38,7 @@ services:
     depends_on:
       rag_service:
         condition: service_started
+
   qdrant:
     image: qdrant/qdrant:latest
     restart: always
@@ -54,6 +52,29 @@ services:
       - 6335
     volumes:
       - ./qdrant_data:/qdrant/storage
+
+  celery:
+    build:
+      context: celery_red/
+    command: celery -A redis_tasks.app worker --loglevel=info --concurrency=1
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - qdrant
+      - ollama
+      - redis
+    volumes:
+      - whisper_model_cache:/home/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+  redis:
+    image: redis:7
 
 volumes:
   whisper_model_cache:
