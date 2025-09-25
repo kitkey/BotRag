@@ -8,8 +8,8 @@ RUN mkdir -p ${APP_HOME}
 
 WORKDIR ${APP_HOME}
 
-COPY requirements.txt .
+COPY celery_red/ ./
+
 RUN pip3 install --no-cache-dir -r requirements.txt
 RUN python3 -c "from faster_whisper import WhisperModel; WhisperModel('large-v3-turbo', download_root='/models', device='cpu')"
 
-COPY redis_tasks.py tools.py ./

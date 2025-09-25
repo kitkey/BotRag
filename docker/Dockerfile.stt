@@ -8,7 +8,5 @@ RUN mkdir -p ${APP_HOME}
 
 WORKDIR ${APP_HOME}
 
-COPY requirements.txt .
+COPY stt/ ./
 RUN pip3 install --no-cache-dir -r requirements.txt
-
-COPY app.py tools.py ./

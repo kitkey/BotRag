@@ -3,6 +3,7 @@ import os
 import re
 import httpx
 from telegram import Update, Chat
+from telegram.error import TimedOut
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -43,7 +44,10 @@ async def le_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         await update.message.reply_text("Ошибка")
         return
 
-    await update.message.reply_text(response.text)
+    try:
+        await update.message.reply_text(response.text)
+    except TimedOut:
+        await update.message.reply_text(response.text)
 
 
 def main() -> None:

@@ -17,14 +17,14 @@ def get_snapshot_dir() -> str:
 
 def set_models(models: Dict) -> None:
     models["embedding_model"] = OllamaEmbeddings(
-        model=os.getenv("embedding_model", "jeffh/intfloat-multilingual-e5-large-instruct:f16"),
-        base_url=os.getenv("ollama_url", "http://ollama:11434"),
+        model=os.getenv("OLLAMA_RETRIEVER", "jeffh/intfloat-multilingual-e5-large-instruct:f16"),
+        base_url=os.getenv("OLLAMA_URL", "http://ollama:11434"),
         num_ctx=512,
     )
     models["llm"] = OllamaLLM(
-        model=os.getenv("llm", "owl/t-lite:q4_0-instruct"),
-        base_url=os.getenv("ollama_url", "http://ollama:11434"),
-        temperature=0.03
+        model=os.getenv("OLLAMA_GENERATOR", "owl/t-lite:q4_0-instruct"),
+        base_url=os.getenv("OLLAMA_URL", "http://ollama:11434"),
+        temperature=0.5
     )
 
 

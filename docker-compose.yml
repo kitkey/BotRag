@@ -18,29 +18,42 @@ services:
 
   rag_service:
     build:
-      context: stt/
+      context: .
+      dockerfile: docker/Dockerfile.stt
+    env_file:
+      - .env-test
     command: sh -c "uvicorn app:app --host=0.0.0.0 --port 8000"
     ports:
       - 8000:8000
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - QDRANT_URL=6333
+      - NUM_GPU_WORKERS=8
     depends_on:
       - qdrant
       - ollama
       - redis
       - celery
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 5
+        window: 120s
 
   bot:
     build:
-      context: bot/
+      context: .
+      dockerfile: docker/Dockerfile.bot
     command: python bot.py
-    env_file: ./bot/.env-test
+    env_file:
+      - .env-test
     depends_on:
       rag_service:
         condition: service_started
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.15.1
     restart: always
     container_name: qdrant
     ports:
@@ -52,19 +65,28 @@ services:
       - 6335
     volumes:
       - ./qdrant_data:/qdrant/storage
+    healthcheck:
+      #test: curl --fail -s http://127.0.0.1:80/healthcheck || exit 1
+      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 3
 
   celery:
     build:
-      context: celery_red/
+      context: .
+      dockerfile: docker/Dockerfile.celery
     command: celery -A redis_tasks.app worker --loglevel=info --concurrency=1
     environment:
       - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env-test
     depends_on:
       - qdrant
-      - ollama
       - redis
+      - ollama
     volumes:
-      - whisper_model_cache:/home/app/models
+      - ./whisper_model_cache:/home/app/models
     deploy:
       resources:
         reservations:
@@ -75,6 +97,3 @@ services:
 
   redis:
     image: redis:7
-
-volumes:
-  whisper_model_cache:

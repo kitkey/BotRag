@@ -8,7 +8,5 @@ RUN mkdir -p ${BOT_HOME}
 
 WORKDIR ${BOT_HOME}
 
-COPY requirements.txt .
+COPY bot/ ./
 RUN pip3 install --no-cache-dir -r requirements.txt
-
-COPY bot.py .
